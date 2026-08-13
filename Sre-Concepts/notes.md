@@ -1,85 +1,300 @@
-Site Reliability Engineering (SRE) — Concepts Guide
+# Site Reliability Engineering (SRE) — Concepts Guide
 
-1. What is SRE?
+## 1. What is SRE?
 
-Site Reliability Engineering (SRE) is a discipline that applies software engineering principles to infrastructure and operations problems. The term was coined by Google, where SRE teams are responsible for the availability, performance, latency, efficiency, and reliability of large-scale production systems.
+**Site Reliability Engineering (SRE)** is a discipline that applies software engineering principles to infrastructure and operations problems.
 
-Key characteristics:
+The term was coined by Google, where SRE teams are responsible for the **availability, performance, latency, efficiency, and reliability** of large-scale production systems.
 
--SRE teams are typically staffed by software engineers who apply coding skills to operational problems.
--SREs write code to automate tasks that would otherwise be done manually (monitoring, deployments, incident response, capacity planning).
--A guiding rule of thumb: SRE teams should spend no more than 50% of their time on operational ("toil") work; the rest should go to engineering/automation.
+### Key Characteristics
 
-2. SRE Principles
+* **Engineering-focused teams** — SRE teams are typically staffed by software engineers who apply coding skills to operational problems.
+* **Automation** — SREs write code to automate tasks that would otherwise be performed manually, such as monitoring, deployments, incident response, and capacity planning.
+* **Limit on toil** — A common Google SRE guideline is that teams should spend no more than **50% of their time on operational ("toil") work**. The remaining time should be spent on engineering, automation, and reliability improvements.
 
--Embracing Risk — Systems are never 100% reliable; pursuing 100% is wasteful and often impossible. SRE embraces an acceptable level of risk defined by SLOs and error budgets rather than chasing perfection.
+---
 
--Eliminating Toil — Toil is manual, repetitive, automatable, tactical work with no lasting value. SRE actively works to identify and eliminate toil through automation.
+## 2. SRE Principles
 
--Monitoring and Observability — Systems must be monitored to detect problems, understand system health, and support data-driven decisions (metrics, logs, traces).
+### Embracing Risk
 
--Automation — Automate everything that is repeatable and safe to automate — deployments, scaling, failover, remediation — to reduce human error and free up engineering time.
+Systems are never 100% reliable. Pursuing 100% reliability is often wasteful and sometimes impossible.
 
--Simplicity — Simple systems are easier to understand, operate, and debug. Complexity is treated as a cost that must be justified.
+SRE embraces an acceptable level of risk defined by **SLOs and error budgets**, rather than attempting to achieve perfect reliability.
 
--Blameless Postmortems — When incidents happen, the focus is on understanding what went wrong systemically — not who to blame — to drive genuine learning and prevent recurrence.
+### Eliminating Toil
 
--Error Budgets — A quantified allowance for unreliability (100% − SLO), used to balance the pace of innovation against reliability risk.
+**Toil** is manual, repetitive, automatable, tactical work that provides little or no lasting value.
 
-3. SLI, SLO, SLA
--SLI — Service Level Indicator
+SRE teams actively identify and eliminate toil through automation.
 
-A quantitative measure of some aspect of the service's behavior. It's the raw metric.
+### Monitoring and Observability
 
-Examples: request latency (e.g., 95th percentile response time), error rate, throughput, availability.
+Systems must be monitored to:
 
-Formula example: SLI = (Good Events / Total Events) × 100
+* Detect problems
+* Understand system health
+* Troubleshoot issues
+* Support data-driven decisions
 
--SLO — Service Level Objective
+Common observability signals include:
 
-A target value or range for an SLI, agreed upon internally, that defines what "good enough" reliability looks like.
+* **Metrics**
+* **Logs**
+* **Traces**
 
-Example: "99.9% of HTTP requests will be served in under 300ms over a rolling 30-day window."
+### Automation
 
-SLOs are internal goals — they drive the error budget.
-Error Budget = 100% − SLO (e.g., 99.9% SLO → 0.1% error budget, ~43 minutes of downtime/month)
+Automate tasks that are repeatable and safe to automate, such as:
 
--SLA — Service Level Agreement
+* Deployments
+* Scaling
+* Failover
+* Remediation
+* Infrastructure provisioning
 
-A contractual agreement with customers that includes SLOs (usually looser than internal targets) and defines consequences (penalties, credits, refunds) if not met.
+Automation reduces human error and frees engineers to focus on higher-value work.
 
-SLAs are external-facing, legally/commercially binding.
-SLOs are usually set stricter than SLAs to provide a buffer/safety margin
+### Simplicity
 
-4. The Four Golden Signals
--Latency — The time it takes to service a request. Distinguish latency of successful requests from failed requests.
+Simple systems are easier to:
 
--Traffic — A measure of demand on the system (HTTP requests/sec, transactions/sec, concurrent sessions).
+* Understand
+* Operate
+* Maintain
+* Debug
 
--Errors — The rate of requests that fail, explicitly (500s), implicitly (200 with wrong content), or by policy (response time over threshold counted as failure).
+Complexity is treated as a cost that must be justified.
 
--Saturation — How "full" the service is — CPU, memory, disk I/O, connection pool usage. Often the best leading indicator, since saturation predicts problems before they cause visible errors.
+### Blameless Postmortems
 
-5. MTTD and MTTR
-MTTD — Mean Time To Detect
+When incidents happen, the focus should be on understanding **what went wrong in the system**, rather than identifying someone to blame.
 
-The average time to discover that an incident is occurring, from the moment it actually started.
+The goal is to:
 
-MTTD = Total Detection Time (across incidents) / Number of Incidents
+* Learn from incidents
+* Identify systemic problems
+* Improve processes
+* Prevent recurrence
 
-Improved through: proactive monitoring, good alerting thresholds, synthetic checks, anomaly detection.
+### Error Budgets
 
-MTTR — Mean Time To Resolve / Repair / Recovery
+An **error budget** is a quantified allowance for unreliability.
 
-The average time to fully resolve an incident, from detection (or start) to resolution.
+It is generally calculated as:
 
-MTTR = Total Resolution Time (across incidents) / Number of Incidents
+```text
+Error Budget = 100% − SLO
+```
 
-Related metrics:
+For example:
 
-Metric	Meaning
-MTTA	Mean Time To Acknowledge — time from alert to a human acknowledging it
-MTTD	Mean Time To Detect — time from issue start to detection
-MTTR	Mean Time To Resolve/Repair — time from detection to full fix
-MTBF	Mean Time Between Failures — average time between incidents (reliability measure)
+```text
+SLO = 99.9%
+Error Budget = 0.1%
+```
+
+Error budgets help balance the pace of innovation against reliability risk.
+
+---
+
+## 3. SLI, SLO, and SLA
+
+### SLI — Service Level Indicator
+
+An **SLI** is a quantitative measurement of some aspect of a service's behavior.
+
+It is the actual metric used to measure service performance or reliability.
+
+Examples include:
+
+* Request latency
+* Error rate
+* Throughput
+* Availability
+
+Example formula:
+
+```text
+SLI = (Good Events / Total Events) × 100
+```
+
+---
+
+### SLO — Service Level Objective
+
+An **SLO** is a target value or range for an SLI. It defines what "good enough" reliability looks like.
+
+Example:
+
+> 99.9% of HTTP requests will be served in under 300ms over a rolling 30-day window.
+
+SLOs are generally **internal goals** and are used to calculate the error budget.
+
+```text
+Error Budget = 100% − SLO
+```
+
+For example:
+
+```text
+SLO = 99.9%
+Error Budget = 0.1%
+```
+
+A 99.9% availability target allows approximately **43 minutes of downtime per 30-day month**.
+
+---
+
+### SLA — Service Level Agreement
+
+An **SLA** is a contractual agreement with customers that defines expected service levels and the consequences if those levels are not met.
+
+Consequences may include:
+
+* Service credits
+* Refunds
+* Financial penalties
+
+SLAs are **external-facing** and may be legally or commercially binding.
+
+Typically:
+
+```text
+SLA < SLO
+```
+
+The internal SLO is often stricter than the customer-facing SLA, providing a safety margin.
+
+### SLI vs SLO vs SLA
+
+| Term    | Meaning                 | Purpose                                         |
+| ------- | ----------------------- | ----------------------------------------------- |
+| **SLI** | Service Level Indicator | Measures actual service performance             |
+| **SLO** | Service Level Objective | Defines the internal reliability target         |
+| **SLA** | Service Level Agreement | Defines the contractual commitment to customers |
+
+---
+
+## 4. The Four Golden Signals
+
+The **Four Golden Signals** are four key metrics recommended for monitoring distributed systems.
+
+### 1. Latency
+
+**Latency** is the time it takes to service a request.
+
+It is important to distinguish between:
+
+* Latency of successful requests
+* Latency of failed requests
+
+Example:
+
+```text
+95th percentile latency = 200ms
+```
+
+This means 95% of requests completed in 200ms or less.
+
+### 2. Traffic
+
+**Traffic** measures the demand placed on a system.
+
+Examples:
+
+* HTTP requests per second
+* Transactions per second
+* Concurrent sessions
+* Messages per second
+
+### 3. Errors
+
+**Errors** measure the rate at which requests fail.
+
+Errors can be:
+
+* **Explicit** — HTTP 500 errors
+* **Implicit** — HTTP 200 response with incorrect content
+* **Policy-based** — Response exceeds an agreed threshold and is considered a failure
+
+### 4. Saturation
+
+**Saturation** measures how "full" a service or resource is.
+
+Examples:
+
+* CPU utilization
+* Memory utilization
+* Disk I/O
+* Connection pool usage
+* Queue length
+
+Saturation is often a useful **leading indicator** because increasing saturation can predict problems before they become visible errors.
+
+---
+
+## 5. MTTD and MTTR
+
+### MTTD — Mean Time To Detect
+
+**MTTD** is the average time required to detect that an incident is occurring.
+
+```text
+MTTD = Total Detection Time / Number of Incidents
+```
+
+MTTD can be improved through:
+
+* Proactive monitoring
+* Effective alerting thresholds
+* Synthetic checks
+* Anomaly detection
+* Better observability
+
+---
+
+### MTTR — Mean Time To Resolve / Repair / Recovery
+
+**MTTR** is the average time required to fully resolve or recover from an incident.
+
+Depending on the organization, MTTR may mean **Mean Time to Resolve, Repair, or Recovery**.
+
+```text
+MTTR = Total Resolution Time / Number of Incidents
+```
+
+---
+
+## Related Reliability Metrics
+
+| Metric   | Meaning                                                                       |
+| -------- | ----------------------------------------------------------------------------- |
+| **MTTA** | Mean Time To Acknowledge — time from alert to a human acknowledging it        |
+| **MTTD** | Mean Time To Detect — time from issue start to detection                      |
+| **MTTR** | Mean Time To Resolve/Repair/Recovery — time from detection to full resolution |
+| **MTBF** | Mean Time Between Failures — average time between failures or incidents       |
+
+---
+
+## Quick Summary
+
+```text
+SLI → What are we measuring?
+SLO → What reliability target do we want?
+SLA → What do we promise our customers?
+Error Budget → How much unreliability can we tolerate?
+
+Four Golden Signals:
+1. Latency
+2. Traffic
+3. Errors
+4. Saturation
+
+Incident Metrics:
+MTTD → How quickly did we detect the problem?
+MTTA → How quickly did someone acknowledge it?
+MTTR → How quickly did we resolve/recover from it?
+MTBF → How long between failures?
+```
 
